@@ -22,11 +22,40 @@ ASSET_KEYWORDS = {
 }
 
 GEO_KEYWORDS = {
-    "Americas": ["us", "usa", "united states", "america", "canada", "brazil", "mexico"],
-    "Europe": ["europe", "eu", "uk", "britain", "germany", "france", "ecb"],
-    "APAC": ["china", "japan", "india", "asia", "australia", "korea", "singapore"],
-    "Middle East": ["saudi", "iran", "israel", "opec", "gulf", "dubai", "uae"],
-    "Africa": ["africa", "nigeria", "kenya", "south africa", "egypt"],
+    "Americas": [
+        "us", "usa", "united states", "america", "american", "canada", "canadian",
+        "brazil", "brazilian", "mexico", "mexican", "argentina", "chile", "colombia",
+        "new york", "wall street", "federal reserve", "nasdaq", "nyse", "s&p",
+        "washington", "silicon valley", "toronto", "sao paulo", "buenos aires",
+    ],
+    "Europe": [
+        "europe", "european", "eu", "uk", "britain", "british", "england",
+        "germany", "german", "france", "french", "italy", "italian", "spain", "spanish",
+        "netherlands", "sweden", "switzerland", "swiss", "poland", "russia", "russian",
+        "ukraine", "ecb", "boe", "bundesbank", "london", "paris", "berlin", "frankfurt",
+        "amsterdam", "zurich", "geneva", "milan", "madrid", "stockholm", "oslo",
+    ],
+    "APAC": [
+        "china", "chinese", "japan", "japanese", "india", "indian", "asia", "asian",
+        "australia", "australian", "korea", "korean", "singapore", "taiwan", "taiwanese",
+        "hong kong", "indonesia", "thailand", "vietnam", "malaysia", "philippines",
+        "pboc", "boj", "rbi", "nikkei", "sensex", "asx", "hang seng", "kospi",
+        "tokyo", "beijing", "shanghai", "mumbai", "sydney", "seoul", "jakarta",
+        "manila", "bangkok", "kuala lumpur", "taipei", "new zealand",
+    ],
+    "Middle East": [
+        "saudi", "saudi arabia", "iran", "iranian", "israel", "israeli", "opec",
+        "gulf", "dubai", "uae", "abu dhabi", "qatar", "kuwait", "bahrain", "oman",
+        "jordan", "iraq", "turkey", "turkish", "egypt", "egyptian", "middle east",
+        "aramco", "riyadh", "tehran", "tel aviv", "istanbul", "ankara",
+    ],
+    "Africa": [
+        "africa", "african", "nigeria", "nigerian", "kenya", "kenyan",
+        "south africa", "south african", "egypt", "egyptian", "ghana", "ethiopia",
+        "tanzania", "morocco", "angola", "cameroon", "rwanda", "senegal",
+        "johannesburg", "lagos", "nairobi", "cairo", "accra", "addis ababa",
+        "jse", "rand", "naira",
+    ],
 }
 
 

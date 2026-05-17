@@ -3,6 +3,16 @@ from datetime import datetime
 from ingestion.base import BaseIngester
 
 TICKERS = ["AAPL", "TSLA", "NVDA", "SPY", "QQQ", "BTC-USD", "GLD", "TLT", "EUR/USD", "OIL"]
+
+TICKER_GEO = {
+    "AAPL": ["Americas"], "TSLA": ["Americas"], "NVDA": ["Americas"],
+    "SPY": ["Americas"], "QQQ": ["Americas"],
+    "BTC-USD": ["Americas", "Europe", "APAC"],
+    "GLD": ["Americas", "Middle East"],
+    "TLT": ["Americas"],
+    "EUR/USD": ["Americas", "Europe"],
+    "OIL": ["Americas", "Middle East"],
+}
 EVENTS = [
     "Unusual volume spike detected in {ticker}",
     "{ticker} breaks key resistance level",
@@ -34,7 +44,7 @@ class MarketIngester(BaseIngester):
                 "raw_content": content,
                 "geo_bbox": None,
                 "asset_tags": [asset_class],
-                "geo_tags": ["Americas"],
+                "geo_tags": TICKER_GEO.get(ticker, ["Americas"]),
                 "url": "",
                 "timestamp": datetime.utcnow().isoformat(),
             })
