@@ -10,7 +10,11 @@
       "Bash(git push *)",
       "Bash(docker --version)",
       "Bash(docker compose *)",
-      "Bash(Start-Sleep -Seconds 5)"
+      "Bash(Start-Sleep -Seconds 5)",
+      "Bash(git check-ignore *)"
     ]
+  },
+  "enabledPlugins": {
+    "frontend-design@claude-plugins-official": true
   }
 }

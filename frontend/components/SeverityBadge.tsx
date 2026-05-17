@@ -1,13 +1,18 @@
-const COLORS: Record<string, string> = {
-  critical: "bg-red-500/20 text-red-400 border-red-500/40",
-  high:     "bg-orange-500/20 text-orange-400 border-orange-500/40",
-  medium:   "bg-yellow-500/20 text-yellow-400 border-yellow-500/40",
-  low:      "bg-green-500/20 text-green-400 border-green-500/40",
+const SEV: Record<string, { color: string; bg: string; border: string }> = {
+  critical: { color: "#EF4444", bg: "rgba(239,68,68,0.1)",   border: "rgba(239,68,68,0.3)"   },
+  high:     { color: "#F97316", bg: "rgba(249,115,22,0.1)",  border: "rgba(249,115,22,0.3)"  },
+  medium:   { color: "#EAB308", bg: "rgba(234,179,8,0.1)",   border: "rgba(234,179,8,0.3)"   },
+  low:      { color: "#22C55E", bg: "rgba(34,197,94,0.1)",   border: "rgba(34,197,94,0.3)"   },
 };
 
 export default function SeverityBadge({ severity }: { severity: string }) {
+  const s = SEV[severity] ?? { color: "#71717A", bg: "rgba(113,113,122,0.1)", border: "rgba(113,113,122,0.3)" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold border uppercase tracking-wide ${COLORS[severity] ?? "bg-slate-500/20 text-slate-400 border-slate-500/40"}`}>
+    <span
+      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-sm text-[10px] mono font-semibold tracking-widest uppercase"
+      style={{ color: s.color, background: s.bg, border: `1px solid ${s.border}` }}
+    >
+      <span className="w-1 h-1 rounded-full" style={{ background: s.color }} />
       {severity}
     </span>
   );

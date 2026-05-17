@@ -3,14 +3,19 @@ import { useState } from "react";
 import SeverityBadge from "./SeverityBadge";
 import type { Alert } from "@/app/dashboard/page";
 
-interface Props {
-  alert: Alert;
-  token: string;
-}
+const SEV_COLOR: Record<string, string> = {
+  critical: "#EF4444",
+  high:     "#F97316",
+  medium:   "#EAB308",
+  low:      "#22C55E",
+};
+
+interface Props { alert: Alert; token: string; }
 
 export default function AlertCard({ alert, token }: Props) {
   const [action, setAction] = useState<string | null>(null);
   const api = process.env.NEXT_PUBLIC_API_URL;
+  const color = SEV_COLOR[alert.severity] ?? "#71717A";
 
   const handleAction = async (a: string) => {
     await fetch(`${api}/feedback`, {
@@ -24,35 +29,64 @@ export default function AlertCard({ alert, token }: Props) {
   const ts = new Date(alert.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
   return (
-    <div className="sentinel-card p-4 animate-slide-in hover:border-slate-600 transition-colors">
-      <div className="flex items-start justify-between gap-2 mb-2">
+    <div
+      className="card hover-lift p-4 alert-enter"
+      style={{ borderLeft: `2px solid ${color}` }}
+    >
+      <div className="flex items-start justify-between gap-2 mb-2.5">
         <SeverityBadge severity={alert.severity} />
-        <span className="text-xs text-slate-500">{ts}</span>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="mono text-[10px] text-sv-muted">{ts}</span>
+        </div>
       </div>
 
-      <h3 className="text-sm font-semibold text-white mb-1 leading-snug">{alert.title}</h3>
-      <p className="text-xs text-slate-400 leading-relaxed mb-3">{alert.summary}</p>
+      <h3 className="text-sm font-semibold text-sv-text mb-1.5 leading-snug">{alert.title}</h3>
+      <p className="text-[11px] text-sv-dim leading-relaxed mb-3">{alert.summary}</p>
 
       {alert.asset_tags?.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
           {alert.asset_tags.map((tag) => (
-            <span key={tag} className="text-xs px-2 py-0.5 bg-sentinel-border/50 rounded text-slate-400">
+            <span key={tag} className="mono text-[10px] px-1.5 py-0.5 bg-sv-raised border border-sv-border rounded-sm text-sv-muted">
               {tag}
             </span>
           ))}
         </div>
       )}
 
-      <div className="flex items-center gap-1 text-xs">
-        <span className="text-slate-500 mr-1">Score {alert.score.toFixed(2)}</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-12 h-1 bg-sv-border rounded-full overflow-hidden">
+            <div className="h-full rounded-full" style={{ width: `${alert.score * 100}%`, background: color }} />
+          </div>
+          <span className="mono text-[10px] text-sv-muted">{alert.score.toFixed(2)}</span>
+        </div>
+
         {action ? (
-          <span className="text-slate-500 capitalize">{action}</span>
+          <span className="mono text-[10px] text-sv-muted capitalize">{action}</span>
         ) : (
-          <>
-            <button onClick={() => handleAction("acted")} className="px-2 py-1 rounded bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors">Act</button>
-            <button onClick={() => handleAction("acknowledged")} className="px-2 py-1 rounded bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors">Ack</button>
-            <button onClick={() => handleAction("dismissed")} className="px-2 py-1 rounded bg-slate-500/10 text-slate-400 hover:bg-slate-500/20 transition-colors">Dismiss</button>
-          </>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => handleAction("acted")}
+              className="mono text-[10px] px-2 py-1 rounded-sm transition-colors"
+              style={{ background: "rgba(34,197,94,0.08)", color: "#22C55E", border: "1px solid rgba(34,197,94,0.2)" }}
+            >
+              Act
+            </button>
+            <button
+              onClick={() => handleAction("acknowledged")}
+              className="mono text-[10px] px-2 py-1 rounded-sm transition-colors"
+              style={{ background: "rgba(245,158,11,0.08)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.2)" }}
+            >
+              Ack
+            </button>
+            <button
+              onClick={() => handleAction("dismissed")}
+              className="mono text-[10px] px-2 py-1 rounded-sm text-sv-muted transition-colors hover:text-sv-dim"
+              style={{ background: "rgba(82,82,91,0.15)", border: "1px solid rgba(82,82,91,0.25)" }}
+            >
+              Dismiss
+            </button>
+          </div>
         )}
       </div>
     </div>
