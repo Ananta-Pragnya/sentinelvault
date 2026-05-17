@@ -237,11 +237,10 @@ export default function LandingPage() {
               <span className="mono text-[10px] text-sv-muted">{new Date().toUTCString().replace("GMT", "UTC")}</span>
             </div>
 
-            <h1 className="text-5xl lg:text-6xl font-black leading-[1.05] tracking-tight mb-6">
-              Stop reading<br />
-              <span className="gradient-text text-glow">noise.</span><br />
-              <span className="text-sv-dim font-light">Start acting on</span><br />
-              <span className="text-sv-text">signal.</span>
+            <h1 className="text-[56px] lg:text-[72px] font-black leading-[0.95] tracking-[-0.03em] mb-6">
+              <span className="text-sv-text block">Every market</span>
+              <span className="text-sv-text block">signal that</span>
+              <span className="text-sv-amber block">matters to you.</span>
             </h1>
 
             <p className="text-sv-dim text-base leading-relaxed max-w-lg mb-8">
@@ -367,33 +366,42 @@ export default function LandingPage() {
 
       {/* ── HOW IT WORKS ── */}
       <section id="how" className="max-w-7xl mx-auto px-6 py-24">
-        <div className="mb-12">
-          <div className="intel-tag mb-4">Architecture</div>
-          <h2 className="text-3xl font-bold mb-2">From raw signal to brief</h2>
-          <p className="text-sv-dim text-sm">Five layers. Under 200ms end-to-end.</p>
-        </div>
+        <div className="grid lg:grid-cols-[280px_1fr] gap-16 items-start">
+          <div className="lg:sticky lg:top-24">
+            <div className="intel-tag mb-4">Under the hood</div>
+            <h2 className="text-3xl font-bold mb-3 leading-tight">Signal to brief.<br/>Under 200ms.</h2>
+            <p className="text-sv-dim text-sm leading-relaxed">
+              Five deterministic layers — no black box. Every alert is traceable back to its raw source event.
+            </p>
+          </div>
 
-        <div className="grid md:grid-cols-5 gap-0">
-          {PIPELINE.map((step, i) => (
-            <div key={step.n} className="relative flex md:flex-col items-start md:items-start gap-4 md:gap-3 pb-6 md:pb-0">
-              {/* Connector */}
-              {i < PIPELINE.length - 1 && (
-                <div className="hidden md:block absolute top-6 left-[calc(50%+20px)] right-0 h-px bg-gradient-to-r from-sv-line to-sv-border" />
-              )}
-
-              <div className="flex flex-col items-center md:items-start gap-2">
-                <div className="w-10 h-10 rounded-sm bg-sv-surface border border-sv-line flex items-center justify-center text-sv-amber text-lg shrink-0 relative z-10">
-                  {step.icon}
+          <div className="space-y-0">
+            {PIPELINE.map((step, i) => (
+              <div key={step.n} className="relative flex gap-6 group">
+                {/* Timeline */}
+                <div className="flex flex-col items-center">
+                  <div
+                    className="w-9 h-9 rounded-sm flex items-center justify-center text-base shrink-0 transition-all group-hover:border-sv-amber"
+                    style={{ background: "#111113", border: "1px solid #27272A" }}
+                  >
+                    <span style={{ color: "#F59E0B" }}>{step.icon}</span>
+                  </div>
+                  {i < PIPELINE.length - 1 && (
+                    <div className="w-px flex-1 min-h-[40px] my-1" style={{ background: "#27272A" }} />
+                  )}
                 </div>
-                <div className="mono text-[10px] text-sv-muted">{step.n}</div>
-              </div>
 
-              <div className="pt-1">
-                <div className="font-semibold text-sm text-sv-text mb-1">{step.label}</div>
-                <div className="text-[11px] text-sv-dim leading-relaxed">{step.desc}</div>
+                {/* Content */}
+                <div className="pb-8 pt-1 min-w-0">
+                  <div className="flex items-center gap-3 mb-1.5">
+                    <span className="mono text-[10px] text-sv-muted">{step.n}</span>
+                    <span className="font-semibold text-sv-text">{step.label}</span>
+                  </div>
+                  <p className="text-sm text-sv-dim leading-relaxed">{step.desc}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
