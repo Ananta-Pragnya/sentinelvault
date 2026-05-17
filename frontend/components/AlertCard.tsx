@@ -1,23 +1,43 @@
 "use client";
 import { useState } from "react";
-import SeverityBadge from "./SeverityBadge";
 import type { Alert } from "@/app/dashboard/page";
 
 const SEV_COLOR: Record<string, string> = {
-  critical: "#EF4444",
-  high:     "#F97316",
-  medium:   "#EAB308",
-  low:      "#22C55E",
+  critical: "var(--red)",
+  high:     "var(--ora)",
+  medium:   "var(--yel)",
+  low:      "var(--live)",
+};
+const SEV_SHORT: Record<string, string> = {
+  critical: "CRIT", high: "HIGH", medium: "MED", low: "LOW",
 };
 
-interface Props { alert: Alert; token: string; }
+interface Props {
+  alert: Alert;
+  token: string;
+  isSelected?: boolean;
+  onClick?: () => void;
+}
 
-export default function AlertCard({ alert, token }: Props) {
-  const [action, setAction] = useState<string | null>(null);
+export default function AlertCard({ alert, token, isSelected, onClick }: Props) {
+  const [action, setAction] = useState<string | null>(alert.user_action ?? null);
   const api = process.env.NEXT_PUBLIC_API_URL;
-  const color = SEV_COLOR[alert.severity] ?? "#71717A";
+  const color = SEV_COLOR[alert.severity] ?? "var(--txt3)";
+  const sevShort = SEV_SHORT[alert.severity] ?? alert.severity.toUpperCase();
 
-  const handleAction = async (a: string) => {
+  const alertId = `SV-${alert.id.slice(-4).toUpperCase()}`;
+  const ts = new Date(alert.created_at);
+  const age = (() => {
+    const diff = Date.now() - ts.getTime();
+    const m = Math.floor(diff / 60000);
+    if (m < 60) return `${m}m`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h`;
+    return `${Math.floor(h / 24)}d`;
+  })();
+
+  const handleAction = async (a: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     await fetch(`${api}/feedback`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -26,68 +46,49 @@ export default function AlertCard({ alert, token }: Props) {
     setAction(a);
   };
 
-  const ts = new Date(alert.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
   return (
     <div
-      className="card hover-lift p-4 alert-enter"
-      style={{ borderLeft: `2px solid ${color}` }}
+      className={`bb-alert alert-enter${isSelected ? " selected" : ""}`}
+      onClick={onClick}
     >
-      <div className="flex items-start justify-between gap-2 mb-2.5">
-        <SeverityBadge severity={alert.severity} />
-        <div className="flex items-center gap-2 shrink-0">
-          <span className="mono text-[10px] text-sv-muted">{ts}</span>
-        </div>
+      {/* Severity column */}
+      <div className="bb-sev-col">
+        <div className="bb-sev-bar" style={{ background: color }} />
+        <div className="bb-sev-label" style={{ color }}>{sevShort}</div>
       </div>
 
-      <h3 className="text-sm font-semibold text-sv-text mb-1.5 leading-snug">{alert.title}</h3>
-      <p className="text-[11px] text-sv-dim leading-relaxed mb-3">{alert.summary}</p>
-
-      {alert.asset_tags?.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-3">
-          {alert.asset_tags.map((tag) => (
-            <span key={tag} className="mono text-[10px] px-1.5 py-0.5 bg-sv-raised border border-sv-border rounded-sm text-sv-muted">
-              {tag}
-            </span>
-          ))}
-        </div>
-      )}
-
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-12 h-1 bg-sv-border rounded-full overflow-hidden">
-            <div className="h-full rounded-full" style={{ width: `${alert.score * 100}%`, background: color }} />
-          </div>
-          <span className="mono text-[10px] text-sv-muted">{alert.score.toFixed(2)}</span>
-        </div>
-
-        {action ? (
-          <span className="mono text-[10px] text-sv-muted capitalize">{action}</span>
-        ) : (
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => handleAction("acted")}
-              className="mono text-[10px] px-2 py-1 rounded-sm transition-colors"
-              style={{ background: "rgba(34,197,94,0.08)", color: "#22C55E", border: "1px solid rgba(34,197,94,0.2)" }}
-            >
-              Act
-            </button>
-            <button
-              onClick={() => handleAction("acknowledged")}
-              className="mono text-[10px] px-2 py-1 rounded-sm transition-colors"
-              style={{ background: "rgba(245,158,11,0.08)", color: "#F59E0B", border: "1px solid rgba(245,158,11,0.2)" }}
-            >
-              Ack
-            </button>
-            <button
-              onClick={() => handleAction("dismissed")}
-              className="mono text-[10px] px-2 py-1 rounded-sm text-sv-muted transition-colors hover:text-sv-dim"
-              style={{ background: "rgba(82,82,91,0.15)", border: "1px solid rgba(82,82,91,0.25)" }}
-            >
-              Dismiss
-            </button>
+      {/* Content */}
+      <div>
+        <div className="bb-alert-title">{alert.title}</div>
+        <div className="bb-alert-body">{alert.summary}</div>
+        {alert.asset_tags?.length > 0 && (
+          <div className="bb-alert-meta">
+            {alert.asset_tags.map((t) => (
+              <span key={t} className="bb-tick">{t.toUpperCase()}</span>
+            ))}
           </div>
         )}
+        {action ? (
+          <div className="bb-action-row">
+            <span className={`bb-action-btn ${action}`}>{action.toUpperCase()}</span>
+          </div>
+        ) : (
+          <div className="bb-action-row">
+            <button className="bb-action-btn" onClick={(e) => handleAction("acted", e)}>ACT</button>
+            <button className="bb-action-btn" onClick={(e) => handleAction("acknowledged", e)}>ACK</button>
+            <button className="bb-action-btn" onClick={(e) => handleAction("dismissed", e)}>DISMISS</button>
+          </div>
+        )}
+      </div>
+
+      {/* Score column */}
+      <div className="bb-alert-right">
+        <div className="bb-alert-id">{alertId}</div>
+        <div className="bb-alert-age">{age} ago</div>
+        <div className="bb-score-num" style={{ color }}>{alert.score.toFixed(2)}</div>
+        <div className="bb-score-track">
+          <div className="bb-score-fill" style={{ width: `${alert.score * 100}%`, background: color }} />
+        </div>
       </div>
     </div>
   );

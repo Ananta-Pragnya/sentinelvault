@@ -7,9 +7,11 @@ interface Props {
   alerts: Alert[];
   token: string;
   onNewAlert: (alert: Alert) => void;
+  onSelect?: (alert: Alert) => void;
+  selected?: Alert | null;
 }
 
-export default function AlertFeed({ alerts, token, onNewAlert }: Props) {
+export default function AlertFeed({ alerts, token, onNewAlert, onSelect, selected }: Props) {
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef(0);
 
@@ -44,17 +46,22 @@ export default function AlertFeed({ alerts, token, onNewAlert }: Props) {
 
   if (alerts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-64 text-slate-500">
-        <div className="text-4xl mb-3">📡</div>
-        <p className="text-sm">Monitoring for alerts...</p>
+      <div style={{ padding: "40px 16px", textAlign: "center", color: "var(--txt3)", fontSize: 10, letterSpacing: 2 }}>
+        NO ALERTS · MONITORING FEEDS...
       </div>
     );
   }
 
   return (
-    <div className="p-3 space-y-2">
+    <div>
       {alerts.map((alert) => (
-        <AlertCard key={alert.id} alert={alert} token={token} />
+        <AlertCard
+          key={alert.id}
+          alert={alert}
+          token={token}
+          isSelected={selected?.id === alert.id}
+          onClick={() => onSelect?.(alert)}
+        />
       ))}
     </div>
   );

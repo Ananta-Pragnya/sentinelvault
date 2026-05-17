@@ -5,18 +5,19 @@ import AssistantChat from "@/components/AssistantChat";
 export default function AssistantPage() {
   const router = useRouter();
   return (
-    <div className="min-h-screen flex flex-col bg-sentinel-bg">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-sentinel-border">
-        <button
-          onClick={() => router.back()}
-          className="text-slate-400 hover:text-white transition-colors text-sm flex items-center gap-2"
-        >
-          ← Dashboard
-        </button>
-        <span className="text-xl font-bold text-sentinel-accent">AI Assistant</span>
-        <div className="w-24" />
-      </header>
-      <div className="flex-1 overflow-hidden">
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column", background: "var(--bg)", color: "var(--txt)", fontFamily: "'JetBrains Mono', monospace", fontSize: 12 }}>
+      <nav className="bb-nav">
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span className="bb-brand">SENTINELVAULT</span>
+          <div className="bb-live-badge"><span className="bb-live-dot" /><span>AI ANALYST</span></div>
+        </div>
+        <div className="bb-nav-right">
+          <button onClick={() => router.back()} className="bb-nav-btn" style={{ border: "none", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace" }}>
+            ← DASHBOARD
+          </button>
+        </div>
+      </nav>
+      <div style={{ flex: 1, overflow: "hidden" }}>
         <AssistantChat />
       </div>
     </div>

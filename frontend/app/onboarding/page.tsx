@@ -3,6 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import OnboardingWizard from "@/components/OnboardingWizard";
 
+const STEPS = [
+  { n: "01", label: "Account",  desc: "Email + password. Auto-register if new." },
+  { n: "02", label: "Markets",  desc: "Which asset classes you trade." },
+  { n: "03", label: "Regions",  desc: "Your geographic exposure." },
+  { n: "04", label: "Profile",  desc: "Role, risk tolerance, alert volume." },
+];
+
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
@@ -18,55 +25,52 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-sv-bg flex">
-      {/* Left panel — branding */}
-      <div className="hidden lg:flex flex-col justify-between w-80 border-r border-sv-border p-10 bg-sv-surface">
-        <div>
-          <div className="flex items-center gap-2 mb-12">
-            <div className="w-6 h-6 rounded-sm bg-sv-amber flex items-center justify-center">
-              <span className="text-sv-bg text-[11px] font-black">SV</span>
-            </div>
-            <span className="font-bold text-sv-text">SentinelVault</span>
-          </div>
+    <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--txt)", fontFamily: "'JetBrains Mono', monospace", fontSize: 12, display: "flex", flexDirection: "column" }}>
+      {/* Nav */}
+      <nav className="bb-nav">
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <span className="bb-brand">SENTINELVAULT</span>
+          <div className="bb-live-badge"><span className="bb-live-dot" /><span>SETUP</span></div>
+        </div>
+        <div style={{ fontSize: 10, color: "var(--txt3)", letterSpacing: 1 }}>
+          STEP {step} OF 4
+        </div>
+      </nav>
 
-          <div className="space-y-6">
-            {[
-              { n: "01", label: "Account",   desc: "Email + password. That's it." },
-              { n: "02", label: "Markets",   desc: "Which asset classes you trade." },
-              { n: "03", label: "Regions",   desc: "Your geographic exposure." },
-              { n: "04", label: "Profile",   desc: "Role, risk tolerance, alert volume." },
-            ].map((s, i) => (
-              <div key={s.n} className={`flex gap-4 transition-all ${step === i + 1 ? "opacity-100" : "opacity-30"}`}>
-                <div className="shrink-0 mt-0.5">
-                  <span className="mono text-[10px] text-sv-amber">{s.n}</span>
-                </div>
+      <div style={{ flex: 1, display: "grid", gridTemplateColumns: "220px 1fr" }}>
+        {/* Left panel */}
+        <div style={{ borderRight: "1px solid var(--bdr)", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+          <div>
+            <div style={{ fontSize: 9, letterSpacing: 2, color: "var(--txt3)", padding: "12px 20px", borderBottom: "1px solid var(--bdr)", background: "var(--bg2)" }}>
+              SETUP PROGRESS
+            </div>
+            {STEPS.map((s, i) => (
+              <div key={s.n} style={{
+                display: "flex", gap: 14, padding: "14px 20px",
+                borderBottom: "1px solid var(--bdr)",
+                opacity: step === i + 1 ? 1 : step > i + 1 ? 0.5 : 0.25,
+                background: step === i + 1 ? "var(--bg3)" : "transparent",
+              }}>
+                <span style={{ fontSize: 9, color: step > i + 1 ? "var(--live)" : step === i + 1 ? "var(--txt)" : "var(--txt3)", letterSpacing: 1, flexShrink: 0, paddingTop: 1 }}>
+                  {step > i + 1 ? "✓" : s.n}
+                </span>
                 <div>
-                  <div className={`text-sm font-semibold mb-0.5 ${step === i + 1 ? "text-sv-text" : "text-sv-muted"}`}>{s.label}</div>
-                  <div className="text-[11px] text-sv-muted">{s.desc}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: step === i + 1 ? "var(--txt)" : "var(--txt3)", marginBottom: 3 }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: "var(--txt3)", lineHeight: 1.5 }}>{s.desc}</div>
                 </div>
               </div>
             ))}
           </div>
-        </div>
 
-        <div className="border-t border-sv-border pt-6">
-          <p className="mono text-[10px] text-sv-muted leading-relaxed">
-            Your data is used solely to personalise alert scoring. We don't sell it.
-          </p>
-        </div>
-      </div>
-
-      {/* Right panel — form */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md">
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-6 h-6 rounded-sm bg-sv-amber flex items-center justify-center">
-              <span className="text-sv-bg text-[11px] font-black">SV</span>
+          <div style={{ padding: "16px 20px", borderTop: "1px solid var(--bdr)" }}>
+            <div style={{ fontSize: 9, color: "var(--txt3)", lineHeight: 1.6 }}>
+              Your data is used solely to personalise alert scoring. We don&apos;t sell it.
             </div>
-            <span className="font-bold text-sv-text">SentinelVault</span>
           </div>
+        </div>
 
+        {/* Right: form */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", padding: 40 }}>
           <OnboardingWizard step={step} setStep={setStep} onComplete={handleComplete} />
         </div>
       </div>
