@@ -106,7 +106,7 @@ Critical ≥ 0.85 | High ≥ 0.65 | Medium ≥ 0.40 | Low < 0.40
 
 - **Backend:** Python 3.12, FastAPI, SQLAlchemy async, Alembic, Redis Streams
 - **ML:** scikit-learn (IsolationForest), sentence-transformers (all-MiniLM-L6-v2)
-- **LLM:** Anthropic claude-sonnet-4-20250514
+- **LLM:** Groq — llama-3.3-70b-versatile (free tier)
 - **Frontend:** Next.js 14 App Router, TypeScript, Tailwind CSS v3
 - **Auth:** JWT (python-jose + bcrypt)
 - **Infra:** Docker Compose (PostgreSQL 16 + Redis 7)
