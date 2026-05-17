@@ -93,7 +93,7 @@ RLHF:      acted → +0.02 on dominant | dismissed → -0.01 | acknowledged → 
 ```
 DATABASE_URL=postgresql+asyncpg://alertuser:alertpass@localhost:5432/alertplatform
 REDIS_URL=redis://localhost:6379
-ANTHROPIC_API_KEY=sk-ant-...
+GROQ_API_KEY=...          # same key as FinMotion (free tier, Llama 3.3 70B)
 NEWS_API_KEY=...          # newsapi.org free tier (optional — RSS works without it)
 JWT_SECRET=...
 JWT_ALGORITHM=HS256

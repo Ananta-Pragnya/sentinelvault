@@ -20,8 +20,7 @@ class Settings(BaseSettings):
     threshold_high: float = 0.65
     threshold_medium: float = 0.40
 
-    class Config:
-        env_file = ".env"
+    model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": False}
 
 
 @lru_cache

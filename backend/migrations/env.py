@@ -8,7 +8,11 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-import sys, os
+import os
+if os.environ.get("DATABASE_URL"):
+    config.set_main_option("sqlalchemy.url", os.environ["DATABASE_URL"])
+
+import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from database import Base
