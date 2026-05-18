@@ -124,11 +124,15 @@ frontend/app/page.tsx             — Landing: ticker bar → nav → 2-col hero
 frontend/app/dashboard/page.tsx   — 3-col dashboard: sidebar | alert feed | detail panel
 frontend/app/onboarding/page.tsx  — 4-step wizard wrapper (220px left panel + form right)
 frontend/app/assistant/page.tsx   — AI chat page with nav back button
+frontend/app/api/
+  gdelt/route.ts    — Server-side GDELT proxy (15-min revalidate cache, avoids browser CORS)
 frontend/components/
   AlertCard.tsx     — bb-alert row: sev bar | content | score. ACT/ACK/DISMISS → POST /feedback
   AlertFeed.tsx     — WebSocket consumer, exponential backoff reconnect, passes onSelect/selected
-  WorldMap.tsx      — Split layout: 280px region table (count bar + severity breakdown)
-                      + SVG map (continent polygons, grid lines, 3-ring alert pins)
+  WorldMap.tsx      — Thin wrapper: compact prop → SVG compact view; full → dynamic WorldMapFull
+  WorldMapFull.tsx  — Leaflet + CartoDB dark tiles. Left 260px region exposure table. Map area:
+                      CircleMarker pins (backend alerts + 10 seed events). Click → detail panel.
+                      Top bar: ALL/severity filters + ⚙ WIP toggle. GDELT live feed via /api/gdelt.
   OnboardingWizard.tsx — Square node steps, flush grid pickers, handleAuth auto-register flow
   AssistantChat.tsx — SV ANALYST label, green › suggestion prefix, bb-chat-* classes
   SeverityBadge.tsx — Square dot, Bloomberg color palette
@@ -191,35 +195,38 @@ NAV_TABS: `["ALERTS", "MAP", "ASSISTANT"]`
 
 ## WorldMap Component
 
-### Projection
+### Architecture (SSR split — CRITICAL)
+`WorldMap.tsx` is a thin wrapper only. Never put Leaflet imports there.
+- `compact` prop → `<CompactMap>` (pure SVG, no tiles, safe for SSR)
+- full → `dynamic(() => import('./WorldMapFull'), { ssr: false })` — skips SSR entirely;
+  Leaflet references `window` and will crash if rendered on the server.
+
+### Compact SVG mode
+`<WorldMap alerts={alerts} compact />` — used in detail panel "GLOBAL HEAT" idle state.
+Equirectangular projection: `x = ((lon+180)/360)*100`, `y = ((90-lat)/180)*50`, viewBox `"0 0 100 50"`.
+Continent polygon paths stored inline (7 simplified shapes, same 100×50 space).
+
+### Full Leaflet mode (WorldMapFull.tsx)
+- **Tiles**: CartoDB dark_all (free, no API key) — `https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png`
+- **Left 260px**: regional exposure table — same 5 regions, count bar, CRIT/HIGH/MED/LOW breakdown, STABLE/MOD/ELEV/HIGH label
+- **Map**: `CircleMarker` pins, radius + color by severity. Click → floating detail panel (top-right of map)
+- **Data sources merged in priority order**: backend `Alert.geo_bbox` > GDELT live > 10 seed events
+- **GDELT**: fetched via `/api/gdelt` proxy on mount + every 15 min. Seed events always shown if GDELT fails.
+- **WIP panel**: top-bar ⚙ button toggles panel listing Causal Chain Graph, Prediction Arcs, Heatmap, Vessel Tracking
+- **Filter bar**: ALL / critical / high / medium / low — filters `CircleMarker` renders
+
+### Regions (used for exposure table classification)
 ```ts
-function project(lat: number, lon: number): [number, number] {
-  return [
-    ((lon + 180) / 360) * 100,   // x ∈ [0,100]
-    ((90 - lat) / 180) * 50,     // y ∈ [0,50] — MUST be *50 not *100
-  ];
-}
-// viewBox: "0 0 100 50"
+{ key:"AMERICAS", match: (_l, lo) => lo < -30 }
+{ key:"EUROPE",   match: (la, lo) => lo >= -25 && lo < 45 && la >= 35 }
+{ key:"M.EAST",   match: (la, lo) => lo >= 25 && lo < 65 && la >= 12 && la < 42 }
+{ key:"APAC",     match: (la, lo) => lo >= 60 || (lo >= 45 && la < 35) }
+{ key:"AFRICA",   match: (la, lo) => lo >= -20 && lo < 55 && la < 35 }
 ```
 
-### Continent Polygons (SVG path strings in 100×50 space)
-- North America, South America, Greenland, Europe, Africa, Asia, Australia
-
-### Regions
-```ts
-{ key:"AMERICAS", centLat:40, centLon:-100, match: (_l,lo) => lo < -30 }
-{ key:"EUROPE",   centLat:50, centLon:15,   match: (la,lo) => lo>=-25 && lo<45 && la>=35 }
-{ key:"M.EAST",   centLat:27, centLon:45,   match: (la,lo) => lo>=25 && lo<65 && la>=12 && la<42 }
-{ key:"APAC",     centLat:25, centLon:110,  match: (la,lo) => lo>=60 || (lo>=45 && la<35) }
-{ key:"AFRICA",   centLat:1,  centLon:18,   match: (la,lo) => lo>=-20 && lo<55 && la<35 }
-```
-
-### Full view layout
-- **Left 280px**: per-region exposure table — count bar, CRIT/HIGH/MED/LOW severity breakdown, status label (STABLE/MOD/ELEV/HIGH)
-- **Right**: SVG map — lat/lon grid lines, equator, continent fills, centroid labels, 3-ring glow pins (outer opacity 0.04, mid 0.12, core 0.9)
-
-### Compact mode
-- `<WorldMap alerts={alerts} compact />` — SVG only, used in detail panel idle state
+### Seed geopolitical events (10 hardcoded in WorldMapFull.tsx)
+Beirut, Kyiv, Taiwan Strait, Khartoum, Tehran, Riyadh, New Delhi, Beijing, Moscow, Nairobi.
+Always present on load. Backend alerts with matching IDs replace them.
 
 ---
 
@@ -233,7 +240,7 @@ geo.py.geo_tags_to_bbox(geo_tags) → geo_bbox JSON
   ↓
 Alert.geo_bbox stored in PostgreSQL
   ↓
-WorldMap reads alert.geo_bbox → projects lat/lon → SVG circle
+WorldMap reads alert.geo_bbox → derives centroid lat/lon → Leaflet CircleMarker
 ```
 
 ### geo.py logic
