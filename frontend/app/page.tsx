@@ -2,20 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 
-const MOCK_ALERTS = [
-  { id: "SV-4821", severity: "critical", color: "var(--red)", title: "Federal Reserve emergency signal cluster", body: "FOMC language model flags 4σ deviation. Bond futures repricing 40bps in 6 mins.", tickers: ["TLT", "SPY", "DXY"], score: 0.94, age: "2m" },
-  { id: "SV-4820", severity: "high",     color: "var(--ora)", title: "Strait of Hormuz naval activity spike",   body: "Activity 3× above 30-day avg. Tanker insurance +18% in 6h.",               tickers: ["OIL", "XLE", "GLD"], score: 0.81, age: "7m" },
-  { id: "SV-4819", severity: "critical", color: "var(--red)", title: "NASDAQ flash-crash pattern forming",      body: "Order book depth collapsed 94%. Algo cascade risk elevated.",                tickers: ["QQQ", "NQ1", "VIX"], score: 0.91, age: "11m" },
-  { id: "SV-4818", severity: "medium",   color: "var(--yel)", title: "TSM options flow — pre-earnings signal", body: "Dark pool + implied vol compression. Informed positioning.",                 tickers: ["TSM", "SOXX", "NVDA"], score: 0.62, age: "18m" },
-];
-const SEV_SHORT: Record<string, string> = { critical: "CRIT", high: "HIGH", medium: "MED", low: "LOW" };
-
-const TICKERS = [
-  "TLT 98.34 -0.21%","SPY 512.08 +0.41%","QQQ 433.72 -0.18%","OIL 82.14 +1.24%",
-  "GLD 192.40 +0.37%","BTC 68,241 +2.1%","EUR/USD 1.0821 -0.12%","VIX 14.32 -3.1%",
-  "NVDA 874.20 +1.8%","DXY 104.32 +0.09%","AAPL 189.14 +0.56%","TSLA 177.54 -1.2%",
-];
-
 export default function LandingPage() {
   const [clock, setClock] = useState("");
   const [counts, setCounts] = useState({ signals: 0, precision: 0, latency: 0, events: 0 });
@@ -54,21 +40,8 @@ export default function LandingPage() {
     return () => obs.disconnect();
   }, []);
 
-  const DOUBLED = [...TICKERS, ...TICKERS];
-
   return (
     <div style={{ background: "var(--bg)", color: "var(--txt)", fontFamily: "'JetBrains Mono', monospace", fontSize: 12, minHeight: "100vh" }}>
-
-      {/* ── Ticker bar ── */}
-      <div className="ticker-wrap" style={{ background: "var(--bg2)", borderBottom: "1px solid var(--bdr)", padding: "5px 0", height: 28 }}>
-        <div className="ticker-inner">
-          {DOUBLED.map((t, i) => (
-            <span key={i} style={{ padding: "0 20px", color: "var(--txt2)", fontSize: 11, letterSpacing: 1, borderRight: "1px solid var(--bdr)", flexShrink: 0 }}>
-              {t}
-            </span>
-          ))}
-        </div>
-      </div>
 
       {/* ── Nav ── */}
       <nav className="bb-nav">
@@ -77,9 +50,9 @@ export default function LandingPage() {
           <div className="bb-live-badge"><span className="bb-live-dot" /><span>LIVE</span></div>
         </div>
         <div className="bb-nav-links">
-          <a href="#how"     className="bb-nav-link">HOW IT WORKS</a>
-          <a href="#demo"    className="bb-nav-link">DEMO</a>
-          <a href="#scoring" className="bb-nav-link">SCORING</a>
+          <a href="#features"  className="bb-nav-link">FEATURES</a>
+          <a href="#how"       className="bb-nav-link">HOW IT WORKS</a>
+          <a href="#pricing"   className="bb-nav-link">PRICING</a>
         </div>
         <div className="bb-nav-right">
           <Link href="/onboarding" className="bb-nav-btn" style={{ textDecoration: "none" }}>SIGN IN</Link>
@@ -89,74 +62,63 @@ export default function LandingPage() {
 
       {/* ── Hero ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid var(--bdr)" }}>
-        <div style={{ padding: "48px 40px", borderRight: "1px solid var(--bdr)" }}>
-          <div className="bb-hero-tag"><span className="bb-live-dot" />LIVE INTELLIGENCE FEED · {clock}</div>
+
+        {/* Left: headline + CTA */}
+        <div style={{ padding: "56px 40px", borderRight: "1px solid var(--bdr)" }}>
+          <div className="bb-hero-tag"><span className="bb-live-dot" />AI-POWERED MARKET INTELLIGENCE · {clock}</div>
           <h1 className="bb-hero-h1">Every signal<br />that <em>matters</em><br />to you.</h1>
           <p className="bb-hero-sub">
-            Global news, market feeds, and macro releases — ingested, scored, and delivered as alerts ranked to your portfolio and risk appetite. No noise. No lag.
+            Global news, market feeds, and geopolitical events — ingested, scored by AI, and delivered as personalised alerts ranked to your portfolio and risk appetite.
           </p>
           <div style={{ display: "flex", border: "1px solid var(--bhi)", marginBottom: 24 }}>
-            <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>START FREE — 2 MIN</Link>
-            <a href="#demo" className="bb-btn-ghost">SEE LIVE ALERTS ↓</a>
+            <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>GET ACCESS — FREE</Link>
+            <a href="#features" className="bb-btn-ghost">SEE FEATURES ↓</a>
           </div>
           <div style={{ display: "flex", gap: 20 }}>
             <div className="bb-trust-item">NO CREDIT CARD</div>
-            <div className="bb-trust-item">REAL-TIME</div>
-            <div className="bb-trust-item">RLHF SCORING</div>
-          </div>
-          {/* Mini spec grid */}
-          <div style={{ marginTop: 40, display: "grid", gridTemplateColumns: "1fr 1fr", border: "1px solid var(--bdr)" }}>
-            {[
-              { k: "SOURCES",  v: "NewsAPI · RSS · Market feed" },
-              { k: "ML MODEL", v: "IsolationForest + LLaMA 70B" },
-              { k: "PROTOCOL", v: "WebSocket — real-time push" },
-              { k: "FEEDBACK", v: "RLHF weight update on act" },
-            ].map((row, i) => (
-              <div key={row.k} style={{
-                padding: "10px 14px",
-                borderBottom: i < 2 ? "1px solid var(--bdr)" : "none",
-                borderRight: i % 2 === 0 ? "1px solid var(--bdr)" : "none",
-              }}>
-                <div style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1.5, marginBottom: 3 }}>{row.k}</div>
-                <div style={{ fontSize: 10, color: "var(--txt2)" }}>{row.v}</div>
-              </div>
-            ))}
+            <div className="bb-trust-item">REAL-TIME FEED</div>
+            <div className="bb-trust-item">ADAPTIVE AI</div>
           </div>
         </div>
 
-        {/* Live terminal preview */}
-        <div style={{ display: "flex", flexDirection: "column" }} id="demo">
-          <div className="bb-terminal-bar">
-            <span className="bb-terminal-title">SENTINELVAULT — LIVE FEED</span>
-            <span className="bb-terminal-live"><span className="bb-live-dot" />LIVE</span>
-          </div>
-          {MOCK_ALERTS.map((a) => (
-            <div key={a.id} className="bb-alert">
-              <div className="bb-sev-col">
-                <div className="bb-sev-bar" style={{ background: a.color }} />
-                <div className="bb-sev-label" style={{ color: a.color }}>{SEV_SHORT[a.severity]}</div>
-              </div>
-              <div>
-                <div className="bb-alert-title">{a.title}</div>
-                <div className="bb-alert-body">{a.body}</div>
-                <div className="bb-alert-meta">
-                  {a.tickers.map((t) => <span key={t} className="bb-tick">{t}</span>)}
-                </div>
-              </div>
-              <div className="bb-alert-right">
-                <div className="bb-alert-id">{a.id}</div>
-                <div className="bb-alert-age">{a.age} ago</div>
-                <div className="bb-score-num" style={{ color: a.color }}>{a.score.toFixed(2)}</div>
-                <div className="bb-score-track">
-                  <div className="bb-score-fill" style={{ width: `${a.score * 100}%`, background: a.color }} />
-                </div>
-              </div>
+        {/* Right: key capabilities grid */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gridTemplateRows: "1fr 1fr" }}>
+          {[
+            {
+              tag: "INTELLIGENCE",
+              title: "Real-time signal detection",
+              body: "Monitors thousands of global sources every minute. Anomalies surface in under 200ms.",
+              color: "var(--live)",
+            },
+            {
+              tag: "GEOPOLITICAL",
+              title: "Global event mapping",
+              body: "Live geopolitical flashpoints plotted on an interactive world map with severity scoring.",
+              color: "var(--ora)",
+            },
+            {
+              tag: "AI SYNTHESIS",
+              title: "LLM-powered briefs",
+              body: "Every alert comes with a 3-sentence AI summary and a 5-bullet evidence chain.",
+              color: "var(--yel)",
+            },
+            {
+              tag: "ADAPTIVE",
+              title: "Learns from your actions",
+              body: "RLHF feedback loop adjusts your scoring weights every time you act or dismiss an alert.",
+              color: "var(--red)",
+            },
+          ].map((f, i) => (
+            <div key={f.tag} style={{
+              padding: "28px 24px",
+              borderRight: i % 2 === 0 ? "1px solid var(--bdr)" : "none",
+              borderBottom: i < 2 ? "1px solid var(--bdr)" : "none",
+            }}>
+              <div style={{ fontSize: 9, letterSpacing: "2px", color: f.color, marginBottom: 10 }}>{f.tag}</div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--txt)", marginBottom: 8, lineHeight: 1.4 }}>{f.title}</div>
+              <div style={{ fontSize: 11, color: "var(--txt2)", lineHeight: 1.7 }}>{f.body}</div>
             </div>
           ))}
-          <div style={{ padding: "8px 16px", borderTop: "1px solid var(--bdr)", display: "flex", justifyContent: "space-between" }}>
-            <span style={{ fontSize: 10, color: "var(--txt3)", letterSpacing: 1 }}>4 ACTIVE · {clock}</span>
-            <Link href="/onboarding" style={{ fontSize: 10, color: "var(--txt2)", letterSpacing: 1, textDecoration: "none" }}>VIEW ALL →</Link>
-          </div>
         </div>
       </div>
 
@@ -168,18 +130,82 @@ export default function LandingPage() {
         <div className="bb-stat"><div className="bb-stat-n">{counts.events.toLocaleString()}+</div><div className="bb-stat-l">EVENTS / DAY</div></div>
       </div>
 
-      {/* ── Pipeline ── */}
-      <div id="how" style={{ padding: "40px", borderBottom: "1px solid var(--bdr)" }}>
-        <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 24 }}>
-          SIGNAL TO BRIEF — UNDER 200ms — FIVE DETERMINISTIC LAYERS
+      {/* ── Features ── */}
+      <div id="features" style={{ padding: "56px 40px", borderBottom: "1px solid var(--bdr)" }}>
+        <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 8 }}>PLATFORM CAPABILITIES</div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: "var(--txt)", marginBottom: 40 }}>
+          Built for traders, analysts,<br />and risk managers.
+        </h2>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", border: "1px solid var(--bdr)" }}>
+          {[
+            {
+              n: "01",
+              title: "Personalised Alert Feed",
+              body: "Alerts scored to your specific portfolio and risk weights. Not a generic news feed — every item is ranked by how much it affects you.",
+              locked: true,
+            },
+            {
+              n: "02",
+              title: "Interactive World Map",
+              body: "Geopolitical events plotted in real time on a live map. Filter by severity, click for AI-generated context, and track developing situations.",
+              locked: true,
+            },
+            {
+              n: "03",
+              title: "AI Analyst Assistant",
+              body: "Ask questions about any alert, market event, or macro situation. Powered by LLaMA 70B with full context from your live alert history.",
+              locked: true,
+            },
+            {
+              n: "04",
+              title: "Portfolio Exposure Dashboard",
+              body: "See exactly which regions, sectors, and asset classes your alerts are clustered around. Regional exposure updated on every new signal.",
+              locked: true,
+            },
+            {
+              n: "05",
+              title: "Adaptive Scoring Engine",
+              body: "The more you use it, the better it gets. RLHF weight updates on every action mean your feed drifts toward what you actually care about.",
+              locked: false,
+            },
+            {
+              n: "06",
+              title: "WebSocket Live Push",
+              body: "No polling. No refresh. Alerts arrive the moment they are scored — sub-200ms from source ingestion to your screen.",
+              locked: false,
+            },
+          ].map((f, i) => (
+            <div key={f.n} style={{
+              padding: "28px 24px",
+              borderRight: i % 3 < 2 ? "1px solid var(--bdr)" : "none",
+              borderBottom: i < 3 ? "1px solid var(--bdr)" : "none",
+            }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
+                <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 2 }}>{f.n}</span>
+                {f.locked && (
+                  <span style={{ fontSize: 8, color: "var(--live)", border: "1px solid var(--live-d)", padding: "1px 6px", letterSpacing: 1 }}>MEMBERS ONLY</span>
+                )}
+              </div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--txt)", marginBottom: 8, lineHeight: 1.4 }}>{f.title}</div>
+              <div style={{ fontSize: 11, color: "var(--txt2)", lineHeight: 1.7 }}>{f.body}</div>
+            </div>
+          ))}
         </div>
+      </div>
+
+      {/* ── How it works ── */}
+      <div id="how" style={{ padding: "56px 40px", borderBottom: "1px solid var(--bdr)" }}>
+        <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 8 }}>UNDER THE HOOD</div>
+        <h2 style={{ fontSize: 22, fontWeight: 700, letterSpacing: -0.5, color: "var(--txt)", marginBottom: 40 }}>
+          Signal to brief in<br /><em style={{ color: "var(--live)", fontStyle: "normal" }}>under 200ms.</em>
+        </h2>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(5,1fr)", border: "1px solid var(--bdr)" }}>
           {[
-            { n: "01", name: "Ingest",     desc: "NewsAPI · RSS · Market feeds · Macro releases. Deduplicated before enrichment." },
-            { n: "02", name: "Enrich",     desc: "NLP entity extraction · geo-tagging · novelty scoring via sentence embeddings." },
-            { n: "03", name: "Score",      desc: "IsolationForest anomaly detection. S = w₁·Impact + w₂·Proximity + w₃·Velocity + w₄·Novelty." },
-            { n: "04", name: "Synthesise", desc: "LLaMA 70B → 3-sentence brief + 5-bullet rationale chain grounded in evidence." },
-            { n: "05", name: "Deliver",    desc: "WebSocket push to dashboard. RLHF weight update on acted/dismissed feedback." },
+            { n: "01", name: "Ingest",     desc: "NewsAPI · RSS · Market feeds · Macro releases. Deduplicated and normalised before enrichment." },
+            { n: "02", name: "Enrich",     desc: "NLP entity extraction, geo-tagging, and novelty scoring via sentence embeddings." },
+            { n: "03", name: "Score",      desc: "IsolationForest anomaly detection. Score = weighted sum of Impact, Proximity, Velocity, Novelty." },
+            { n: "04", name: "Synthesise", desc: "LLaMA 70B generates a 3-sentence brief and 5-bullet evidence chain grounded in source text." },
+            { n: "05", name: "Deliver",    desc: "WebSocket push to your dashboard. RLHF weight update fires on every acted or dismissed alert." },
           ].map((s, i) => (
             <div key={s.n} className="bb-how-step" style={{ borderRight: i < 4 ? "1px solid var(--bdr)" : "none" }}>
               <div className="bb-how-step-num">{s.n}</div>
@@ -190,88 +216,70 @@ export default function LandingPage() {
         </div>
       </div>
 
-      {/* ── Scoring + dashboard preview ── */}
-      <div id="scoring" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid var(--bdr)" }}>
-        <div style={{ padding: "40px", borderRight: "1px solid var(--bdr)" }}>
-          <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 24 }}>SCORING FORMULA</div>
-          <div className="bb-formula">
-            S = w₁·Impact<br />
-            &nbsp;&nbsp;&nbsp;+ w₂·Proximity<br />
-            &nbsp;&nbsp;&nbsp;+ w₃·Velocity<br />
-            &nbsp;&nbsp;&nbsp;+ w₄·Novelty
-          </div>
-          <div style={{ marginTop: 16, fontSize: 11, color: "var(--txt2)", lineHeight: 1.8 }}>
-            Weights adapt through RLHF. When you mark an alert as{" "}
-            <em style={{ color: "var(--live)", fontStyle: "normal" }}>acted</em>, the dominant weight increases by 0.02.{" "}
-            <em style={{ color: "var(--red)", fontStyle: "normal" }}>Dismiss</em> it and proximity pulls back.
-          </div>
-
-          <div style={{ marginTop: 24, fontSize: 9, letterSpacing: 2, color: "var(--txt3)", marginBottom: 12 }}>SEVERITY THRESHOLDS</div>
+      {/* ── Pricing ── */}
+      <div id="pricing" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", borderBottom: "1px solid var(--bdr)" }}>
+        <div style={{ padding: "56px 40px", borderRight: "1px solid var(--bdr)" }}>
+          <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 8 }}>FREE TIER</div>
+          <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: -1, color: "var(--txt)", marginBottom: 4 }}>$0 <span style={{ fontSize: 12, color: "var(--txt3)", fontWeight: 400 }}>/month</span></div>
+          <div style={{ fontSize: 11, color: "var(--txt2)", marginBottom: 24, lineHeight: 1.7 }}>Everything you need to get started. No credit card required.</div>
           {[
-            { label: "CRITICAL", val: "S ≥ 0.85", color: "var(--red)", pct: 85 },
-            { label: "HIGH",     val: "S ≥ 0.65", color: "var(--ora)", pct: 65 },
-            { label: "MEDIUM",   val: "S ≥ 0.40", color: "var(--yel)", pct: 40 },
-            { label: "LOW",      val: "S < 0.40",  color: "var(--txt3)", pct: 20 },
-          ].map((r) => (
-            <div key={r.label} className="bb-wt-row" style={{ marginBottom: 6 }}>
-              <span className="bb-wt-label" style={{ color: r.color, width: 80 }}>{r.label}</span>
-              <div className="bb-wt-track"><div className="bb-wt-fill" style={{ width: `${r.pct}%`, background: r.color }} /></div>
-              <span className="bb-wt-pct" style={{ width: 64, color: r.color }}>{r.val}</span>
-            </div>
+            "Real-time alert feed",
+            "AI-generated summaries",
+            "Interactive world map",
+            "RLHF adaptive scoring",
+            "WebSocket live push",
+            "AI analyst assistant",
+          ].map((item) => (
+            <div key={item} className="bb-trust-item" style={{ marginBottom: 10 }}>{item}</div>
           ))}
+          <div style={{ marginTop: 28, display: "inline-flex", border: "1px solid var(--bhi)" }}>
+            <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>CREATE ACCOUNT</Link>
+          </div>
         </div>
 
-        <div style={{ padding: "40px" }}>
-          <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 24 }}>DASHBOARD STRUCTURE</div>
-          <div style={{ border: "1px solid var(--bdr)" }}>
-            <div style={{ display: "grid", gridTemplateColumns: "80px 1fr 100px", borderBottom: "1px solid var(--bdr)", height: 22, background: "var(--bg2)" }}>
-              {["SIDEBAR", "ALERT FEED", "DETAIL"].map((h, i) => (
-                <div key={h} style={{ borderRight: i < 2 ? "1px solid var(--bdr)" : "none", padding: "4px 8px", fontSize: 8, color: "var(--txt3)", letterSpacing: 1 }}>{h}</div>
-              ))}
-            </div>
-            {[
-              ["SYSTEM · LIVE", "CRITICAL: Fed Reserve...", "AI RATIONALE"],
-              ["ALERTS: 2 CRIT", "HIGH: Hormuz spike...", "EVIDENCE"],
-              ["EXPOSURE: HIGH", "MEDIUM: Options flow...", "SCORE WEIGHTS"],
-              ["RLHF: 3 ACTED", "LOW: Routine update...", "RLHF WEIGHTS"],
-            ].map((row, i) => (
-              <div key={i} style={{ display: "grid", gridTemplateColumns: "80px 1fr 100px", borderBottom: i < 3 ? "1px solid var(--bdr)" : "none", height: 20 }}>
-                <div style={{ borderRight: "1px solid var(--bdr)", padding: "3px 8px", fontSize: 8, color: "var(--txt3)" }}>{row[0]}</div>
-                <div style={{ borderRight: "1px solid var(--bdr)", padding: "3px 8px", fontSize: 8, color: "var(--txt2)" }}>{row[1]}</div>
-                <div style={{ padding: "3px 8px", fontSize: 8, color: i === 0 ? "var(--live)" : "var(--txt3)" }}>{row[2]}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 24, fontSize: 9, letterSpacing: 2, color: "var(--txt3)", marginBottom: 12 }}>RLHF FEEDBACK LOOP</div>
+        <div style={{ padding: "56px 40px" }}>
+          <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--yel)", marginBottom: 8 }}>COMING SOON</div>
+          <div style={{ fontSize: 32, fontWeight: 700, letterSpacing: -1, color: "var(--txt)", marginBottom: 4 }}>PRO <span style={{ fontSize: 12, color: "var(--txt3)", fontWeight: 400 }}>/ enterprise</span></div>
+          <div style={{ fontSize: 11, color: "var(--txt2)", marginBottom: 24, lineHeight: 1.7 }}>Advanced features for professional traders and risk desks.</div>
           {[
-            { a: "ACTED →",        d: "+0.02 on dominant weight" },
-            { a: "DISMISSED →",    d: "-0.01 across all weights" },
-            { a: "ACKNOWLEDGED →", d: "no change — marked seen" },
-          ].map((r) => (
-            <div key={r.a} style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", borderBottom: "1px solid var(--bdr)" }}>
-              <span style={{ fontSize: 10, color: "var(--live)", letterSpacing: 1 }}>{r.a}</span>
-              <span style={{ fontSize: 10, color: "var(--txt2)" }}>{r.d}</span>
+            "Causal chain graph visualisation",
+            "Forward prediction arcs",
+            "30-day signal density heatmap",
+            "Live vessel & AIS tracking",
+            "Custom source whitelists",
+            "API access + webhooks",
+          ].map((item) => (
+            <div key={item} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, fontSize: 10, color: "var(--txt3)", letterSpacing: "0.5px" }}>
+              <span style={{ color: "var(--yel)" }}>—</span>
+              {item}
             </div>
           ))}
+          <div style={{ marginTop: 28 }}>
+            <span style={{ fontSize: 10, color: "var(--txt3)", letterSpacing: 1, border: "1px solid var(--bdr)", padding: "8px 16px" }}>NOTIFY ME WHEN AVAILABLE</span>
+          </div>
         </div>
       </div>
 
       {/* ── CTA ── */}
-      <div style={{ padding: "64px 40px", textAlign: "center", borderBottom: "1px solid var(--bdr)" }}>
+      <div style={{ padding: "72px 40px", textAlign: "center", borderBottom: "1px solid var(--bdr)" }}>
+        <div style={{ fontSize: 9, letterSpacing: 3, color: "var(--txt3)", marginBottom: 16 }}>GET STARTED</div>
         <h2 className="bb-cta-h">Your edge is <em>200ms</em> away.</h2>
         <p className="bb-cta-sub">SET YOUR RISK WEIGHTS. WE HANDLE THE REST.</p>
         <div style={{ display: "inline-flex", border: "1px solid var(--bhi)" }}>
-          <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>CREATE ACCOUNT — FREE</Link>
-          <a href="#" className="bb-btn-ghost">BACK TO TOP ↑</a>
+          <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>CREATE FREE ACCOUNT</Link>
+          <Link href="/onboarding" className="bb-btn-ghost" style={{ textDecoration: "none" }}>SIGN IN →</Link>
         </div>
         <div className="bb-cta-micro">NO CREDIT CARD · 2-MINUTE SETUP · CANCEL ANY TIME</div>
       </div>
 
       {/* ── Footer ── */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 20px", background: "var(--bg2)", borderTop: "1px solid var(--bdr)" }}>
-        <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 2 }}>SENTINELVAULT · REAL-TIME MARKET INTELLIGENCE</span>
-        <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1 }}>{clock}</span>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", background: "var(--bg2)", borderTop: "1px solid var(--bdr)" }}>
+        <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 2 }}>SENTINELVAULT · AI-POWERED MARKET INTELLIGENCE</span>
+        <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
+          <Link href="/onboarding" style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1, textDecoration: "none" }}>SIGN IN</Link>
+          <Link href="/onboarding" style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1, textDecoration: "none" }}>GET ACCESS</Link>
+          <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1 }}>{clock}</span>
+        </div>
       </div>
     </div>
   );
