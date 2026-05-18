@@ -1,3 +1,4 @@
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 from functools import lru_cache
 
@@ -21,6 +22,14 @@ class Settings(BaseSettings):
     threshold_medium: float = 0.40
 
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8", "case_sensitive": False}
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_db_url(cls, v: str) -> str:
+        # Railway Postgres plugin provides postgresql:// — asyncpg needs +asyncpg dialect
+        if isinstance(v, str) and v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
 
 
 @lru_cache
