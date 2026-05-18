@@ -1,4 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap');
+@import 'leaflet/dist/leaflet.css';
+
+/* ── Leaflet dark overrides ── */
+.leaflet-container { background: #0c0c0c; font-family: 'JetBrains Mono', monospace; }
+.leaflet-control-attribution { background: #111 !important; color: #333 !important; font-size: 8px !important; letter-spacing: 0.5px; border-top: 1px solid #1a1a1a !important; }
+.leaflet-control-attribution a { color: #444 !important; }
+.leaflet-bar { border: 1px solid #222 !important; box-shadow: none !important; }
+.leaflet-bar a { background: #111 !important; color: #888 !important; border-bottom: 1px solid #1a1a1a !important; font-size: 14px; line-height: 26px; width: 26px; height: 26px; }
+.leaflet-bar a:hover { background: #161616 !important; color: #f5f5f5 !important; }
+.leaflet-popup-content-wrapper { background: #111; border: 1px solid #222; border-radius: 0; box-shadow: none; color: #f5f5f5; font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+.leaflet-popup-tip { background: #111; }
+.leaflet-popup-close-button { color: #444 !important; }
+.leaflet-popup-close-button:hover { color: #f5f5f5 !important; }
 
 @tailwind base;
 @tailwind components;
