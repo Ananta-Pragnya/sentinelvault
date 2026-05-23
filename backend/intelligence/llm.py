@@ -1,4 +1,6 @@
 import json
+import hashlib
+import redis.asyncio as aioredis
 import httpx
 from config import get_settings
 
@@ -6,6 +8,23 @@ cfg = get_settings()
 
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 MODEL = "llama-3.3-70b-versatile"
+_CACHE_TTL = 86_400  # 24 h
+
+_redis_client: aioredis.Redis | None = None
+
+
+async def _redis() -> aioredis.Redis:
+    global _redis_client
+    if _redis_client is None:
+        _redis_client = await aioredis.from_url(cfg.redis_url, decode_responses=True)
+    return _redis_client
+
+
+def _cache_key(event_data: dict) -> str:
+    digest = hashlib.md5(
+        json.dumps(event_data, sort_keys=True, default=str).encode()
+    ).hexdigest()
+    return f"llm:summary:{digest}"
 
 ALERT_SYSTEM_PROMPT = (
     "You are an alert intelligence analyst. Given a raw event cluster with "
@@ -32,6 +51,12 @@ def _headers() -> dict:
 
 
 async def summarise_event(event_data: dict) -> dict:
+    r = await _redis()
+    key = _cache_key(event_data)
+    cached = await r.get(key)
+    if cached:
+        return json.loads(cached)
+
     async with httpx.AsyncClient(timeout=30.0) as client:
         response = await client.post(
             GROQ_API_URL,
@@ -51,7 +76,10 @@ async def summarise_event(event_data: dict) -> dict:
         )
         response.raise_for_status()
         raw = response.json()["choices"][0]["message"]["content"]
-        return json.loads(raw)
+        result = json.loads(raw)
+
+    await r.setex(key, _CACHE_TTL, json.dumps(result))
+    return result
 
 
 async def assistant_response(message: str, history: list[dict], user_context: dict) -> str:

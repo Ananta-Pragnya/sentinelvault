@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import AlertFeed from "@/components/AlertFeed";
 import WorldMap from "@/components/WorldMap";
@@ -11,6 +11,7 @@ type NavTab = (typeof NAV_TABS)[number];
 
 export interface Alert {
   id: string;
+  event_id?: string;
   title: string;
   severity: string;
   score: number;
@@ -21,6 +22,9 @@ export interface Alert {
   proximity_score?: number;
   velocity_score?: number;
   novelty_score?: number;
+  anomaly_flag?: boolean;
+  causal_chain?: { event_id: string; relation: string; probability: number }[];
+  forecast?: Record<string, unknown>;
   user_action?: string | null;
   geo_bbox?: { lat_min: number; lat_max: number; lon_min: number; lon_max: number };
   created_at: string;
@@ -32,14 +36,17 @@ const SEV_COLOR: Record<string, string> = {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [token, setToken]       = useState("");
-  const [alerts, setAlerts]     = useState<Alert[]>([]);
-  const [filter, setFilter]     = useState<Severity>("all");
-  const [selected, setSelected] = useState<Alert | null>(null);
-  const [unread, setUnread]     = useState(0);
-  const [loading, setLoading]   = useState(true);
-  const [navTab, setNavTab]     = useState<NavTab>("ALERTS");
-  const [clock, setClock]       = useState("");
+  const [token, setToken]         = useState("");
+  const [alerts, setAlerts]       = useState<Alert[]>([]);
+  const [filter, setFilter]       = useState<Severity>("all");
+  const [selected, setSelected]   = useState<Alert | null>(null);
+  const [unread, setUnread]       = useState(0);
+  const [loading, setLoading]     = useState(true);
+  const [navTab, setNavTab]       = useState<NavTab>("ALERTS");
+  const [clock, setClock]         = useState("");
+  const [notifPerm, setNotifPerm] = useState<NotificationPermission>("default");
+  const apiRef = useRef(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000");
+  const tokenRef = useRef("");
 
   useEffect(() => {
     const tick = () => setClock(new Date().toLocaleTimeString("en-GB", { hour12: false, timeZone: "UTC" }) + " UTC");
@@ -49,20 +56,67 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    if (typeof Notification !== "undefined") {
+      setNotifPerm(Notification.permission);
+    }
+  }, []);
+
+  useEffect(() => {
     const t = localStorage.getItem("sv_token") ?? "";
     if (!t) { router.replace("/onboarding"); return; }
     setToken(t);
-    const api = process.env.NEXT_PUBLIC_API_URL;
+    tokenRef.current = t;
+    const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
     fetch(`${api}/alerts?limit=100`, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.json())
       .then((data) => { setAlerts(data); setLoading(false); })
       .catch(() => setLoading(false));
   }, [router]);
 
-  const onNewAlert = (alert: Alert) => {
+  const onNewAlert = useCallback((alert: Alert) => {
     setAlerts((prev) => [alert, ...prev].slice(0, 200));
     setUnread((n) => n + 1);
+    if (alert.severity === "critical" && typeof Notification !== "undefined" && Notification.permission === "granted") {
+      new Notification(`⚠ CRITICAL: ${alert.title}`, {
+        body: alert.summary,
+        tag: alert.id,
+        icon: "/favicon.ico",
+      });
+    }
+  }, []);
+
+  const requestNotifPerm = async () => {
+    if (typeof Notification === "undefined") return;
+    const perm = await Notification.requestPermission();
+    setNotifPerm(perm);
   };
+
+  const performAction = useCallback(async (alertId: string, action: string) => {
+    const api = apiRef.current;
+    const t   = tokenRef.current;
+    if (!t) return;
+    await fetch(`${api}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${t}` },
+      body: JSON.stringify({ alert_id: alertId, action }),
+    });
+    setAlerts((prev) =>
+      prev.map((a) => (a.id === alertId ? { ...a, user_action: action } : a))
+    );
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!selected) return;
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.key === "a" || e.key === "A") performAction(selected.id, "acted");
+      if (e.key === "k" || e.key === "K") performAction(selected.id, "acknowledged");
+      if (e.key === "d" || e.key === "D") performAction(selected.id, "dismissed");
+      if (e.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [selected, performAction]);
 
   const visible = filter === "all" ? alerts : alerts.filter((a) => a.severity === filter);
 
@@ -117,6 +171,20 @@ export default function DashboardPage() {
           ))}
         </div>
         <div className="bb-nav-right">
+          {notifPerm !== "granted" && (
+            <button
+              onClick={requestNotifPerm}
+              style={{
+                marginRight: 8, padding: "3px 10px", fontSize: 9, letterSpacing: "1.5px",
+                background: "transparent", border: "1px solid var(--bdr)",
+                color: "var(--txt3)", cursor: "pointer",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+              title="Enable browser notifications for CRITICAL alerts"
+            >
+              🔔 ALERTS
+            </button>
+          )}
           <span style={{ fontSize: 10, color: "var(--txt3)", letterSpacing: 1, padding: "0 16px", borderLeft: "1px solid var(--bdr)", display: "flex", alignItems: "center" }}>
             {clock}
           </span>
@@ -232,8 +300,26 @@ export default function DashboardPage() {
           <div style={{ display: "flex", flexDirection: "column", overflow: "hidden" }}>
             {selected ? (
               <div style={{ overflowY: "auto", flex: 1 }}>
-                <div className="bb-detail-hdr">
-                  AI RATIONALE — SV-{selected.id.slice(-4).toUpperCase()}
+                <div className="bb-detail-hdr" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>AI RATIONALE — SV-{selected.id.slice(-4).toUpperCase()}</span>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    {[["A","acted"],["K","acknowledged"],["D","dismissed"]].map(([key, action]) => (
+                      <span key={key} title={action}
+                        onClick={() => performAction(selected.id, action)}
+                        style={{
+                          fontSize: 8, letterSpacing: "1px", cursor: "pointer",
+                          border: "1px solid var(--bdr)", padding: "1px 5px",
+                          color: selected.user_action === action ? "var(--live)" : "var(--txt3)",
+                          background: selected.user_action === action ? "var(--live-d)" : "transparent",
+                        }}
+                      >
+                        [{key}]
+                      </span>
+                    ))}
+                    <span onClick={() => setSelected(null)}
+                      style={{ fontSize: 8, letterSpacing: "1px", cursor: "pointer", border: "1px solid var(--bdr)", padding: "1px 5px", color: "var(--txt3)" }}
+                    >[ESC]</span>
+                  </div>
                 </div>
 
                 <div className="bb-detail-block">

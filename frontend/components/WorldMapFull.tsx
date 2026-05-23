@@ -2,6 +2,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, CircleMarker, useMap } from "react-leaflet";
 import type { Alert } from "@/app/dashboard/page";
+import CausalChainGraph from "./CausalChainGraph";
 
 // Fix Leaflet default icon paths broken by webpack
 import L from "leaflet";
@@ -61,7 +62,6 @@ const SEED_EVENTS: MapEvent[] = [
 ];
 
 const WIP_FEATURES = [
-  { id:"wip-1", label:"CAUSAL CHAIN GRAPH",   eta:"Q3 2026", desc:"Visualise event dependency trees on the map surface" },
   { id:"wip-2", label:"PREDICTION ARCS",      eta:"Q3 2026", desc:"Forward-probability corridors drawn between linked nodes" },
   { id:"wip-3", label:"HEATMAP OVERLAY",      eta:"Q4 2026", desc:"30-day signal density heat rendering per region" },
   { id:"wip-4", label:"LIVE VESSEL TRACKING", eta:"Q4 2026", desc:"AIS naval position integration (premium feed)" },
@@ -117,12 +117,13 @@ function MapTheme() {
 interface Props { alerts: Alert[] }
 
 export default function WorldMapFull({ alerts }: Props) {
-  const [events,      setEvents]      = useState<MapEvent[]>(SEED_EVENTS);
-  const [selected,    setSelected]    = useState<MapEvent | null>(null);
-  const [filter,      setFilter]      = useState("ALL");
-  const [dataSource,  setDataSource]  = useState("SEED");
-  const [lastUpdated, setLastUpdated] = useState<string | null>(null);
-  const [showWIP,     setShowWIP]     = useState(false);
+  const [events,       setEvents]       = useState<MapEvent[]>(SEED_EVENTS);
+  const [selected,     setSelected]     = useState<MapEvent | null>(null);
+  const [filter,       setFilter]       = useState("ALL");
+  const [dataSource,   setDataSource]   = useState("SEED");
+  const [lastUpdated,  setLastUpdated]  = useState<string | null>(null);
+  const [showWIP,      setShowWIP]      = useState(false);
+  const [showCausal,   setShowCausal]   = useState(false);
 
   // Merge backend alerts into map events
   const backendEvents = useMemo(() => alerts.flatMap((a) => { const e = toMapEvent(a); return e ? [e] : []; }), [alerts]);
@@ -219,9 +220,21 @@ export default function WorldMapFull({ alerts }: Props) {
             </button>
           ))}
           <button
-            onClick={() => setShowWIP((v) => !v)}
+            onClick={() => { setShowCausal(true); setShowWIP(false); }}
             style={{
               marginLeft:8, padding:"3px 10px", fontSize:9, letterSpacing:"1.5px",
+              background: showCausal ? "var(--live-d)" : "transparent",
+              border:`1px solid ${showCausal ? "var(--live)" : "var(--bdr)"}`,
+              color: showCausal ? "var(--live)" : "var(--txt3)",
+              cursor:"pointer", fontFamily:"'JetBrains Mono',monospace",
+            }}
+          >
+            ◈ CAUSAL
+          </button>
+          <button
+            onClick={() => setShowWIP((v) => !v)}
+            style={{
+              marginLeft:4, padding:"3px 10px", fontSize:9, letterSpacing:"1.5px",
               background: showWIP ? "var(--yel-d)" : "transparent",
               border:`1px solid ${showWIP ? "var(--yel)" : "var(--bdr)"}`,
               color: showWIP ? "var(--yel)" : "var(--txt3)",
@@ -287,8 +300,11 @@ export default function WorldMapFull({ alerts }: Props) {
           </div>
         </div>
 
-        {/* ── Right: Leaflet map ── */}
+        {/* ── Right: Leaflet map (+ causal overlay) ── */}
         <div style={{ position:"relative", overflow:"hidden" }}>
+          {showCausal && (
+            <CausalChainGraph alerts={alerts} onClose={() => setShowCausal(false)} />
+          )}
           <MapContainer
             center={[20, 10]}
             zoom={2}

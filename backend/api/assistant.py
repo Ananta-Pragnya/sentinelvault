@@ -1,9 +1,10 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.auth import get_current_user
+from core.limiter import limiter
 from database import get_db
 from models.alert import Alert
 from models.user import User
@@ -14,7 +15,9 @@ router = APIRouter(prefix="/assistant", tags=["assistant"])
 
 
 @router.post("")
+@limiter.limit("20/minute")
 async def chat(
+    request: Request,
     body: AssistantRequest,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
