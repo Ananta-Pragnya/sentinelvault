@@ -73,11 +73,15 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("sv_token", "demo");
-    setToken("demo");
-    tokenRef.current = "demo";
-    setAlerts(DEMO_ALERTS);
-    setLoading(false);
+    const t = localStorage.getItem("sv_token") ?? "";
+    if (!t) { router.replace("/onboarding"); return; }
+    setToken(t);
+    tokenRef.current = t;
+    const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    fetch(`${api}/alerts?limit=100`, { headers: { Authorization: `Bearer ${t}` } })
+      .then((r) => r.json())
+      .then((data) => { setAlerts(Array.isArray(data) && data.length ? data : DEMO_ALERTS); setLoading(false); })
+      .catch(() => { setAlerts(DEMO_ALERTS); setLoading(false); });
   }, [router]);
 
   const onNewAlert = useCallback((alert: Alert) => {
@@ -195,9 +199,9 @@ export default function DashboardPage() {
           <span style={{ fontSize: 10, color: "var(--txt3)", letterSpacing: 1, padding: "0 16px", borderLeft: "1px solid var(--bdr)", display: "flex", alignItems: "center" }}>
             {clock}
           </span>
-          <button onClick={() => router.push("/")}
+          <button onClick={() => { localStorage.removeItem("sv_token"); router.replace("/onboarding"); }}
             className="bb-nav-btn">
-            HOME
+            SIGN OUT
           </button>
         </div>
       </nav>

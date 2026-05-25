@@ -4,23 +4,23 @@ import { useRouter } from "next/navigation";
 import OnboardingWizard from "@/components/OnboardingWizard";
 
 const STEPS = [
-  { n: "01", label: "Account",  desc: "Email + password. Auto-register if new." },
-  { n: "02", label: "Markets",  desc: "Which asset classes you trade." },
-  { n: "03", label: "Regions",  desc: "Your geographic exposure." },
-  { n: "04", label: "Profile",  desc: "Role, risk tolerance, alert volume." },
+  { n: "01", label: "Markets", desc: "Which asset classes you trade." },
+  { n: "02", label: "Regions", desc: "Your geographic exposure." },
+  { n: "03", label: "Profile", desc: "Role, risk tolerance, alert volume." },
 ];
 
 export default function OnboardingPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
 
-  const handleComplete = async (profile: Record<string, unknown>, token: string) => {
+  const handleComplete = async (profile: Record<string, unknown>) => {
+    localStorage.setItem("sv_token", "demo");
     const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     await fetch(`${api}/profile`, {
       method: "PUT",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(profile),
-    });
+    }).catch(() => {});
     router.replace("/dashboard");
   };
 
@@ -33,7 +33,7 @@ export default function OnboardingPage() {
           <div className="bb-live-badge"><span className="bb-live-dot" /><span>SETUP</span></div>
         </div>
         <div style={{ fontSize: 10, color: "var(--txt3)", letterSpacing: 1 }}>
-          STEP {step} OF 4
+          STEP {step} OF 3
         </div>
       </nav>
 
