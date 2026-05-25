@@ -55,8 +55,7 @@ export default function LandingPage() {
           <a href="#pricing"   className="bb-nav-link">PRICING</a>
         </div>
         <div className="bb-nav-right">
-          <Link href="/onboarding" className="bb-nav-btn" style={{ textDecoration: "none" }}>SIGN IN</Link>
-          <Link href="/onboarding" className="bb-nav-btn primary" style={{ textDecoration: "none" }}>GET ACCESS</Link>
+          <Link href="/dashboard" className="bb-nav-btn primary" style={{ textDecoration: "none" }}>LAUNCH DASHBOARD</Link>
         </div>
       </nav>
 
@@ -71,7 +70,7 @@ export default function LandingPage() {
             Global news, market feeds, and geopolitical events — ingested, scored by AI, and delivered as personalised alerts ranked to your portfolio and risk appetite.
           </p>
           <div style={{ display: "flex", border: "1px solid var(--bhi)", marginBottom: 24 }}>
-            <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>GET ACCESS — FREE</Link>
+            <Link href="/dashboard" className="bb-btn-white" style={{ textDecoration: "none" }}>GET ACCESS — FREE</Link>
             <a href="#features" className="bb-btn-ghost">SEE FEATURES ↓</a>
           </div>
           <div style={{ display: "flex", gap: 20 }}>
@@ -233,7 +232,7 @@ export default function LandingPage() {
             <div key={item} className="bb-trust-item" style={{ marginBottom: 10 }}>{item}</div>
           ))}
           <div style={{ marginTop: 28, display: "inline-flex", border: "1px solid var(--bhi)" }}>
-            <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>CREATE ACCOUNT</Link>
+            <Link href="/dashboard" className="bb-btn-white" style={{ textDecoration: "none" }}>LAUNCH DASHBOARD</Link>
           </div>
         </div>
 
@@ -266,8 +265,7 @@ export default function LandingPage() {
         <h2 className="bb-cta-h">Your edge is <em>200ms</em> away.</h2>
         <p className="bb-cta-sub">SET YOUR RISK WEIGHTS. WE HANDLE THE REST.</p>
         <div style={{ display: "inline-flex", border: "1px solid var(--bhi)" }}>
-          <Link href="/onboarding" className="bb-btn-white" style={{ textDecoration: "none" }}>CREATE FREE ACCOUNT</Link>
-          <Link href="/onboarding" className="bb-btn-ghost" style={{ textDecoration: "none" }}>SIGN IN →</Link>
+          <Link href="/dashboard" className="bb-btn-white" style={{ textDecoration: "none" }}>LAUNCH DASHBOARD →</Link>
         </div>
         <div className="bb-cta-micro">NO CREDIT CARD · 2-MINUTE SETUP · CANCEL ANY TIME</div>
       </div>
@@ -276,8 +274,7 @@ export default function LandingPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 20px", background: "var(--bg2)", borderTop: "1px solid var(--bdr)" }}>
         <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 2 }}>SENTINELVAULT · AI-POWERED MARKET INTELLIGENCE</span>
         <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-          <Link href="/onboarding" style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1, textDecoration: "none" }}>SIGN IN</Link>
-          <Link href="/onboarding" style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1, textDecoration: "none" }}>GET ACCESS</Link>
+          <Link href="/dashboard" style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1, textDecoration: "none" }}>DASHBOARD</Link>
           <span style={{ fontSize: 9, color: "var(--txt3)", letterSpacing: 1 }}>{clock}</span>
         </div>
       </div>
