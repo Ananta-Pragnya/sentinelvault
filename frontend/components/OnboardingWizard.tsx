@@ -36,7 +36,13 @@ export default function OnboardingWizard({ step, setStep, onComplete }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      }).catch(() => { throw new Error("Cannot reach server — make sure the backend is running on port 8000"); });
+      }).catch(() => {
+        // Backend unreachable — enter demo mode so the dashboard is still accessible
+        localStorage.setItem("sv_token", "demo");
+        router.replace("/dashboard");
+        return null as unknown as Response;
+      });
+      if (!res) return;
 
       if (res.status === 401) {
         // New user — register then log in

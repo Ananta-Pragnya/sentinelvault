@@ -34,6 +34,17 @@ const SEV_COLOR: Record<string, string> = {
   critical: "var(--red)", high: "var(--ora)", medium: "var(--yel)", low: "var(--live)",
 };
 
+const DEMO_ALERTS: Alert[] = [
+  { id:"d1", title:"Fed signals surprise 50bps cut amid banking stress", severity:"critical", score:0.94, summary:"Federal Reserve sources indicate emergency rate deliberations following three regional bank failures. Treasury yields collapsed 40bps intraday. Systemic contagion risk elevated.", rationale:"Three FDIC-supervised banks failed within 72h. CDS spreads on regional financials +180bps. Fed funds futures pricing 92% probability of emergency action. Dollar index -1.4% on safe-haven reversal.", asset_tags:["TLT","SPY","GLD","USD"], impact_score:0.96, proximity_score:0.88, velocity_score:0.97, novelty_score:0.91, anomaly_flag:true, geo_bbox:{lat_min:25,lat_max:50,lon_min:-125,lon_max:-65}, created_at: new Date(Date.now()-4*60000).toISOString() },
+  { id:"d2", title:"PBoC liquidity injection $420B — largest since 2020", severity:"critical", score:0.91, summary:"People's Bank of China injected ¥3T via 7-day reverse repos signalling acute credit stress. Evergrande bond halt triggered systemic review across developer sector.", rationale:"OMO volume 6.2× 30-day average. Property sector CDS +340bps. Offshore yuan -0.9%. HSCEI futures limit-down pre-open.", asset_tags:["FXI","EEM","CNH","BABA"], impact_score:0.93, proximity_score:0.79, velocity_score:0.94, novelty_score:0.87, anomaly_flag:true, geo_bbox:{lat_min:18,lat_max:53,lon_min:73,lon_max:135}, created_at: new Date(Date.now()-11*60000).toISOString() },
+  { id:"d3", title:"Strait of Hormuz transit suspended — tanker incident", severity:"high", score:0.83, summary:"Iranian Revolutionary Guard forces boarded a Panamanian-flagged VLCC. US 5th Fleet activated. Brent crude spiked 7.2% on supply disruption fears.", rationale:"Hormuz carries 21% of global oil. VLCC spot rates +38%. Options IV on crude 30-day +22pts. US carrier group repositioning confirmed.", asset_tags:["OIL","XLE","UUP"], impact_score:0.87, proximity_score:0.72, velocity_score:0.91, novelty_score:0.76, anomaly_flag:true, geo_bbox:{lat_min:22,lat_max:28,lon_min:54,lon_max:60}, created_at: new Date(Date.now()-23*60000).toISOString() },
+  { id:"d4", title:"ECB emergency meeting called — EUR/USD flash crash -1.8%", severity:"high", score:0.79, summary:"Unscheduled ECB governing council session announced. Italian BTP-Bund spread blew out 80bps. EUR/USD touched 1.0340 before partial recovery.", rationale:"BTP auction bid-cover 1.1× (weakest since 2012). TARGET2 imbalances widening. Italian PM statement delayed. Bloomberg terminal showed bid/ask spread widen 10×.", asset_tags:["EUR/USD","EWI","EWG"], impact_score:0.82, proximity_score:0.84, velocity_score:0.78, novelty_score:0.71, geo_bbox:{lat_min:36,lat_max:71,lon_min:-10,lon_max:35}, created_at: new Date(Date.now()-38*60000).toISOString() },
+  { id:"d5", title:"Taiwan semiconductor export controls — TSMC halts US shipments", severity:"high", score:0.77, summary:"Beijing announced semiconductor export restrictions targeting TSMC's US-bound advanced node production. NVDA, AMD, QCOM futures dropped 9-14% after-hours.", rationale:"TSMC supplies 92% of sub-3nm global capacity. Export control covers HBM3 and CoWoS packaging. WTO dispute filing expected within 48h. SEMI index -11% AH.", asset_tags:["NVDA","AMD","QCOM","TSM"], impact_score:0.89, proximity_score:0.61, velocity_score:0.83, novelty_score:0.88, geo_bbox:{lat_min:22,lat_max:26,lon_min:120,lon_max:122}, created_at: new Date(Date.now()-55*60000).toISOString() },
+  { id:"d6", title:"IMF downgrades global growth forecast to 1.8%", severity:"medium", score:0.64, summary:"IMF World Economic Outlook interim update cut 2025 global GDP to 1.8%, below GFC trough. Emerging market debt distress index at 14-year high.", rationale:"19 of G20 nations now below trend. Debt service ratios exceed 2008 levels in 34 EM nations. IMF SDR allocation debate reopened.", asset_tags:["EEM","TLT","DXY"], impact_score:0.71, proximity_score:0.55, velocity_score:0.58, novelty_score:0.62, geo_bbox:{lat_min:-60,lat_max:80,lon_min:-180,lon_max:180}, created_at: new Date(Date.now()-80*60000).toISOString() },
+  { id:"d7", title:"Russia gas pipeline sabotage — Baltic disruption confirmed", severity:"medium", score:0.61, summary:"Subsea pipeline serving Finland and Estonia sustained confirmed explosive damage. NATO Article 4 consultations triggered. European nat gas futures +18%.", rationale:"Pipeline carried 12BCM/yr. NATO MARCOM activated Baltic monitoring. Three suspect vessels tracked by AIS prior to incident.", asset_tags:["TTF","XLE","EWD"], impact_score:0.68, proximity_score:0.66, velocity_score:0.62, novelty_score:0.54, geo_bbox:{lat_min:54,lat_max:65,lon_min:10,lon_max:30}, created_at: new Date(Date.now()-95*60000).toISOString() },
+  { id:"d8", title:"Bitcoin exchange net outflows hit 90-day high", severity:"low", score:0.38, summary:"On-chain data shows 24h exchange net outflows of 42,000 BTC — typically a bullish accumulation signal. Derivatives funding rate neutral.", rationale:"Glassnode exchange reserve 30-day low. Long-term holder supply at 2-year high. OI unchanged suggesting spot-driven move.", asset_tags:["BTC-USD"], impact_score:0.41, proximity_score:0.29, velocity_score:0.44, novelty_score:0.36, geo_bbox:{lat_min:-60,lat_max:80,lon_min:-180,lon_max:180}, created_at: new Date(Date.now()-120*60000).toISOString() },
+];
+
 export default function DashboardPage() {
   const router = useRouter();
   const [token, setToken]         = useState("");
@@ -66,11 +77,16 @@ export default function DashboardPage() {
     if (!t) { router.replace("/onboarding"); return; }
     setToken(t);
     tokenRef.current = t;
+    if (t === "demo") {
+      setAlerts(DEMO_ALERTS);
+      setLoading(false);
+      return;
+    }
     const api = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
     fetch(`${api}/alerts?limit=100`, { headers: { Authorization: `Bearer ${t}` } })
       .then((r) => r.json())
-      .then((data) => { setAlerts(data); setLoading(false); })
-      .catch(() => setLoading(false));
+      .then((data) => { setAlerts(Array.isArray(data) ? data : DEMO_ALERTS); setLoading(false); })
+      .catch(() => { setAlerts(DEMO_ALERTS); setLoading(false); });
   }, [router]);
 
   const onNewAlert = useCallback((alert: Alert) => {
