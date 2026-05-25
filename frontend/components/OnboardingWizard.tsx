@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const ASSET_CLASSES = ["Equities", "FX", "Commodities", "Crypto", "Fixed Income", "Real Estate"];
 const REGIONS       = ["Americas", "Europe", "APAC", "Middle East", "Africa"];
@@ -14,6 +15,7 @@ interface Props {
 
 export default function OnboardingWizard({ step, setStep, onComplete }: Props) {
   const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const router = useRouter();
   const [email, setEmail]       = useState("");
   const [password, setPassword] = useState("");
   const [assets, setAssets]     = useState<string[]>([]);
@@ -34,8 +36,10 @@ export default function OnboardingWizard({ step, setStep, onComplete }: Props) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
-      });
+      }).catch(() => { throw new Error("Cannot reach server — make sure the backend is running on port 8000"); });
+
       if (res.status === 401) {
+        // New user — register then log in
         res = await fetch(`${api}/auth/register`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -50,11 +54,18 @@ export default function OnboardingWizard({ step, setStep, onComplete }: Props) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
         });
+        if (!res.ok) throw new Error("Login failed after registration — try again");
+        const data = await res.json();
+        localStorage.setItem("sv_token", data.access_token);
+        setStep(2); // new user → complete onboarding
+        return;
       }
+
       if (!res.ok) throw new Error("Login failed — check your password");
       const data = await res.json();
       localStorage.setItem("sv_token", data.access_token);
-      setStep(2);
+      // Existing user — skip onboarding, go straight to dashboard
+      router.replace("/dashboard");
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "Authentication failed");
     } finally {
