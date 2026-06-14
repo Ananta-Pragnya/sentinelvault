@@ -2,20 +2,20 @@
 
 > AI-powered alert forecasting platform for financial and geopolitical risk intelligence.
 
-Real-time ingestion → NLP enrichment → anomaly detection → LLM summarisation → personalised graded alerts delivered via live dashboard, WebSocket feed, and AI chat assistant.
+Real-time ingestion -> NLP enrichment -> anomaly detection -> LLM summarisation -> personalised graded alerts delivered via live dashboard, WebSocket feed, and AI chat assistant.
 
 ---
 
 ## Features
 
-- **Live ingestion** — NewsAPI, RSS feeds, simulated market signals
-- **5-layer AI pipeline** — NLP → geo-tagging → IsolationForest anomaly → causal chain → XGBoost-style forecast → Claude LLM summary
-- **Personalised scoring** — `S = w1·Impact + w2·Proximity + w3·Velocity + w4·Novelty` tuned to each user's profile
-- **RLHF weight updates** — alerts you act on increase that component's weight; dismissed alerts reduce it
-- **Live dashboard** — WebSocket alert feed with severity filter + SVG world heat map
-- **AI assistant** — chat interface powered by Claude with access to your recent alerts and profile
-- **4-step onboarding** — asset classes, geographic exposure, role, risk tolerance, alert volume
-- **Docker Compose** — single command startup
+- **Live ingestion** - NewsAPI, RSS feeds, simulated market signals
+- **5-layer AI pipeline** - NLP → geo-tagging → IsolationForest anomaly → causal chain → XGBoost-style forecast → Claude LLM summary
+- **Personalised scoring** - `S = w1·Impact + w2·Proximity + w3·Velocity + w4·Novelty` tuned to each user's profile
+- **RLHF weight updates** - alerts you act on increase that component's weight; dismissed alerts reduce it
+- **Live dashboard** - WebSocket alert feed with severity filter + SVG world heat map
+- **AI assistant** - chat interface powered by Claude with access to your recent alerts and profile
+- **4-step onboarding** - asset classes, geographic exposure, role, risk tolerance, alert volume
+- **Docker Compose** - single command startup
 
 ---
 
