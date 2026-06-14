@@ -67,7 +67,7 @@ npm run dev
 | `DATABASE_URL` | PostgreSQL async URL |
 | `REDIS_URL` | Redis connection URL |
 | `ANTHROPIC_API_KEY` | Claude API key (required for LLM features) |
-| `NEWS_API_KEY` | newsapi.org key (optional — RSS works without it) |
+| `NEWS_API_KEY` | newsapi.org key (optional - RSS works without it) |
 | `JWT_SECRET` | Secret for signing JWTs |
 | `JWT_EXPIRE_MINUTES` | Token lifetime (default 1440 = 24h) |
 
@@ -106,7 +106,7 @@ Critical ≥ 0.85 | High ≥ 0.65 | Medium ≥ 0.40 | Low < 0.40
 
 - **Backend:** Python 3.12, FastAPI, SQLAlchemy async, Alembic, Redis Streams
 - **ML:** scikit-learn (IsolationForest), sentence-transformers (all-MiniLM-L6-v2)
-- **LLM:** Groq — llama-3.3-70b-versatile (free tier)
+- **LLM:** Groq - llama-3.3-70b-versatile (free tier)
 - **Frontend:** Next.js 14 App Router, TypeScript, Tailwind CSS v3
 - **Auth:** JWT (python-jose + bcrypt)
 - **Infra:** Docker Compose (PostgreSQL 16 + Redis 7)
