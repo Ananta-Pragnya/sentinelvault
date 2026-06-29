@@ -113,4 +113,3 @@ Critical ≥ 0.85 | High ≥ 0.65 | Medium ≥ 0.40 | Low < 0.40
 
 ---
 
-Built with [Claude Code](https://claude.ai/claude-code)
